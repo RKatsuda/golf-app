@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Golf Yard Finder</title>
+
+<style>
+body{
+    margin:0;
+    background:black;
+    color:white;
+    text-align:center;
+    font-family:sans-serif;
+}
+
+#video{
+    width:100%;
+    max-height:80vh;
+}
+
+#result{
+    font-size:32px;
+    margin:10px;
+}
+
+button{
+    font-size:20px;
+    padding:10px 20px;
+    margin:10px;
+}
+</style>
+</head>
+<body>
+
+<h2>Golf Yard Finder</h2>
+
+<video id="video" autoplay playsinline></video>
+
+<div id="result">
+距離を測定してください
+</div>
+
+<button onclick="resetPoints()">
+リセット
+</button>
+
+<script>
+
+const video = document.getElementById("video");
+const result = document.getElementById("result");
+
+let points = [];
+
+navigator.mediaDevices.getUserMedia({
+    video:{
+        facingMode:"environment"
+    }
+})
+.then(stream=>{
+    video.srcObject = stream;
+});
+
+video.addEventListener("click",(e)=>{
+
+    points.push(e.offsetY);
+
+    if(points.length===2){
+
+        const pixelHeight =
+        Math.abs(points[0]-points[1]);
+
+        calculateDistance(pixelHeight);
+
+    }
+});
+
+function calculateDistance(pixelHeight){
+
+    const FLAG_HEIGHT_M = 2.1;
+
+    /*
+      仮キャリブレーション値
+      実機で調整必要
+    */
+    const CALIBRATION = 600;
+
+    const distanceMeters =
+    (FLAG_HEIGHT_M * CALIBRATION)
+    / pixelHeight;
+
+    const yards =
+    distanceMeters * 1.09361;
+
+    result.innerHTML =
+    yards.toFixed(1) + " yd";
+}
+
+function resetPoints(){
+
+    points=[];
+
+    result.innerHTML =
+    "距離を測定してください";
+}
+
+</script>
+
+</body>
+</html>
